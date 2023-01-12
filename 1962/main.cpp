@@ -1,49 +1,53 @@
-#include <iostream>
+/*
+ * @lc app=leetcode id=1962 lang=cpp
+ *
+ * [1962] Remove Stones to Minimize the Total
+ */
+
 #include <vector>
-#include <queue>
-#include <utility>
+#include <algorithm>
 
 using namespace std;
 
+// @lc code=start
 class Solution {
 public:
-  int nearestExit(vector<vector<char>>& maze, vector<int>& entrance) {
-    int m = maze.size();
-    int n = maze.front().size();
-    queue<pair<int,int>> q;
 
-    q.push({entrance[0], entrance[1]});
-
-    int dist = 0;
-    bool found = false;
-    for(;; dist++){
-      int qsize = q.size();
-      for(int i = 0; i < qsize; ++i){
-        auto p = q.front(); q.pop();
-        if(p.first < 0 || p.second < 0 || p.first >= m || p.second >= n){
-          continue;
+    void heapify(vector<int>& vec, int idx, int size){
+        if(idx*2+1 >= size) return;
+        if(idx*2+2 >= size || vec[idx*2+1] > vec[idx*2+2]){
+            if(vec[idx*2+1] > vec[idx]){
+                swap(vec[idx], vec[idx*2+1]);
+                heapify(vec, idx*2+1, size);
+            }
+        }else{
+            if(vec[idx*2+2] > vec[idx]){
+                swap(vec[idx], vec[idx*2+2]);
+                heapify(vec, idx*2+2, size);
+            }
         }
-        if(maze[p.first][p.second] == '+') continue;
-        if(p.first == 0 || p.second == 0 || p.first == m-1 || p.second == n-1){
-          if(dist > 0){
-            found = true;
-            break;
-          }
-        }
-        maze[p.first][p.second] = '+';
-        q.push({p.first+1, p.second});
-        q.push({p.first, p.second-1});
-        q.push({p.first-1, p.second});
-        q.push({p.first, p.second+1});
-      }
-      if(found) break;
-      if(q.size() == 0) break;
     }
 
-    return found ? dist : -1;
-  }
-};
+    void heap(vector<int>& vec, int size){
+        int idx = vec.size() / 2 - 1;
+        for(int i = idx; i >= 0; --i){
+            heapify(vec, i, size);
+        }
+    }
 
-int main(){
-  return 0;
-}
+    int minStoneSum(vector<int>& piles, int k) {
+        int size = piles.size();
+        heap(piles, size);
+        for(int i = 0; i < k; ++i){
+            piles[0] -= piles[0] / 2;
+            heapify(piles, 0, size);
+        }
+        int total = 0;
+        for(int i = 0; i < size; ++i){
+            total += piles[i];
+        }
+        return total;
+    }
+};
+// @lc code=end
+
